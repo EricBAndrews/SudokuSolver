@@ -69,7 +69,58 @@ def genOpts(board):
             row.append(squareOpts(board, r, c))
         opts.append(row)
     return opts
-    
+
+# returns minimum length option list
+def minOpts(options):
+    minR = -1
+    minC = -1
+    min = 10
+    for r in range(9):
+        for c in range(9):
+            nOpts = len(options[r][c])
+            if (nOpts > 1 and nOpts < min):
+                min = nOpts
+                minR = r
+                minC = c
+    return minR, minC
+
+def checkRow(board, row):
+    for i in range(1, 10):
+        if (board[row].count(i) > 1):
+            # print("duplicate of " + str(i))
+            return False
+    return True
+
+def checkCol(board, col):
+    colList = [board[i][col] for i in range(9)]
+    for i in range(1, 10):
+        if (colList.count(i) > 1):
+            # print("duplicate of " + str(i))
+            return False
+    return True
+
+def checkSquare(board, row, col):
+    squareList = []
+    for i in range(row, row + 3):
+        for j in range(col, col + 3):
+            squareList.append(board[i][j])
+    for i in range(1, 10):
+        if (squareList.count(i) > 1):
+            # print("duplicate of " + str(i))
+            return False
+    return True
+
+# returns true if the board is valid, false otherwise
+def validate(board):
+    for i in range(9):
+        if not (checkCol(board, i) or checkRow(board, i)):
+            return False
+    for i in [0, 3, 6]:
+        for j in [0, 3, 6]:
+            if not (checkSquare(board, i, j)):
+                return False
+    return True
+
 # solves the board by filling in all squares with one logically possible
 # answer. if none of those squares exist, tries every option for the square
 # with the fewest options. returns False if the board is self-contradictory,
@@ -78,33 +129,49 @@ def solve(board):
     options = genOpts(board)
     newBoard = []
     solved = True
+    # create new board
     for r in range(9):
         newRow = []
         for c in range(9):
             # no option exists; the board is impossible
             if (options[r][c] == []):
                 return False
+            # build new board from options
             if (len(options[r][c]) == 1):
                 newRow.append(options[r][c][0])
             else:
                 solved = False
                 newRow.append(0)
         newBoard.append(newRow)
+    # check if the board is valid
+    if (not validate(board)):
+        return False
     # no unsolved squares left; we're done, so return the board
     if solved:
         return newBoard
-    # recurse!
+    # no change has happened, so time for fancy recursion
+    elif (newBoard == board):
+        tryRow, tryCol = minOpts(options)
+        # try every option; all except the right one will cause an
+        # impossible board and return false
+        # print("Recursing on " + str(tryRow) + ", " + str(tryCol) +
+        #       " with options " + str(options[tryRow][tryCol]))
+        for opt in options[tryRow][tryCol]:
+            # print("  trying " + str(opt))
+            newBoard[tryRow][tryCol] = opt
+            #printBoard(newBoard)
+            test = solve(newBoard)
+            if (test):
+                return test
+            # print("failed")
+            
+    # simple recursion--we have made progress, so we can keep doing
+    # process of elimination style solving
     else:
+        #printBoard(newBoard)
         return solve(newBoard)
 
-curBoard = parse("board0.txt")
+curBoard = parse("board3.txt")
 printBoard(curBoard)
 printBoard(solve(curBoard))
-# print(inRow(curBoard, 2))
-# print(inRow(curBoard, 7))
-# print(inCol(curBoard, 4))
-# print(inCol(curBoard, 8))
-# print(inSquare(curBoard, 0, 0))
-# print(inSquare(curBoard, 4, 4))
-# print(inSquare(curBoard, 5, 5))
-# print(inSquare(curBoard, 0, 8))
+#printBoard(solve(curBoard))

@@ -171,7 +171,14 @@ def solve(board):
         #printBoard(newBoard)
         return solve(newBoard)
 
-curBoard = parse("board3.txt")
+# curBoard = parse("board0.txt")
+# printBoard(curBoard)
+# printBoard(solve(curBoard))
+
+# curBoard = parse("board2.txt")
+# printBoard(curBoard)
+# printBoard(solve(curBoard))
+
+curBoard = parse("hardestPuzzle.txt")
 printBoard(curBoard)
 printBoard(solve(curBoard))
-#printBoard(solve(curBoard))

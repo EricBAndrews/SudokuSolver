@@ -1,7 +1,7 @@
 CC = clang
 OPTS = -Wall
 
-all: driver
+all: driver.e
 
 board.o: board.c board.h
 	$(CC) $(OPTS) -c board.c
@@ -9,8 +9,8 @@ board.o: board.c board.h
 helper.o: helper.c helper.h board.o
 	$(CC) $(OPTS) -c helper.c board.o
 
-driver: driver.c board.o helper.o
-	$(CC) $(OPTS) -o driver driver.c helper.o board.o
+driver.e: driver.c board.o helper.o
+	$(CC) $(OPTS) -o driver.e driver.c helper.o board.o
 
 clean:
 	rm *.o; rm driver

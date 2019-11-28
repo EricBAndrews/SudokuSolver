@@ -8,6 +8,6 @@ int main(int argc, char** argv) {
   }
 
   struct Board* test = parse("test");
-
+  printBoard(test);
   return 0;
 }

@@ -7,12 +7,15 @@
 
 struct Square {
   uint8_t val;
+  uint8_t numOpts;
   uint8_t opts[9];
 };
 
 struct Board {
   struct Square* squares;
 };
+
+struct Square initSquare(int val);
 
 struct Board* initBoard();
 

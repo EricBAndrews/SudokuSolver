@@ -5,6 +5,17 @@
 
 struct Board* parse(char* fName) {
   struct Board* ret = initBoard();
+  FILE* boardFile = fopen(fName, "r");
+  int i = 0;
+  char ch = getc(boardFile);
+  while (ch != EOF) {
+    if (ch != '\n') {
+      printf("%i ", (int) ch - 48);
+      ret->squares[i] = initSquare((int) ch - 48);
+      ++i;
+    }
+    ch = getc(boardFile);
+  }
   return ret;
 }
 

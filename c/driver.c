@@ -7,7 +7,7 @@ int main(int argc, char** argv) {
     printf("please give a valid filename as an argument\n");
   }
 
-  struct Board* test = parse("test");
+  struct Board* test = parse("board0.txt");
   printBoard(test);
   return 0;
 }

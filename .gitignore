@@ -1,4 +1,5 @@
 *.o
 *.e
 *.txt
+.DS_Store
 !boards/*

@@ -9,5 +9,6 @@ int main(int argc, char** argv) {
 
   struct Board* test = parse("board0.txt");
   printBoard(test);
+  updateRow(test, 3);
   return 0;
 }

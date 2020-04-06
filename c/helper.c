@@ -10,8 +10,14 @@ struct Board* parse(char* fName) {
   char ch = getc(boardFile);
   while (ch != EOF) {
     if (ch != '\n') {
-      printf("%i ", (int) ch - 48);
+      // printf("%i ", (int) ch - 48);
       ret->squares[i] = initSquare((int) ch - 48);
+      if (ret->squares[i].val) {
+        ret->squares[i].numOpts = 0;
+        for (int j = 0; j < 9; ++j) {
+          ret->squares[i].opts[j] = false;
+        }
+      }
       ++i;
     }
     ch = getc(boardFile);

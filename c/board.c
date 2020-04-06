@@ -5,16 +5,10 @@
 struct Square initSquare(int val) {
   struct Square ret;
   ret.val = (uint8_t) val;
-  ret.numOpts = 0;
-  int curOpt = 1;
+  ret.numOpts = (val == 0) ? 9 : 0; // 0 options represents fixed number
+  // int curOpt = 1;
   for (int i = 0; i < 9; ++i) {
-    if (curOpt == val) {
-      ++curOpt;
-    }
-    else {
-      ret.opts[i] = curOpt;
-      ++curOpt;
-    }
+    ret.opts[i] = (i + 1 == val) ? false : true;
   }
   return ret;
 }
@@ -45,7 +39,7 @@ void updateRow(struct Board* b, int r) {
   // generate list of numbers in row
   for (int c = 0; c < 9; ++c) {
     val = b->squares[r * 9 + c].val;
-    printf("%i\n", val);
+    // printf("%i\n", val);
     if (val) {
       inRow[i] = val;
       ++i;
@@ -54,16 +48,84 @@ void updateRow(struct Board* b, int r) {
 
   // update options in row--for each character in row, remove from options
   // of space on board
-  for (int c = 0; c < i; ++c) {
-    val = inRow[c];
-    struct Square cur = b->squares[r * 9 + c];
-    cur.opts[val - 1] = 0;
-    // TODO: TEST!
+  for (int c = 0; c < 9; ++c) {
+    struct Square* cur = &(b->squares[r * 9 + c]);
+    // for each value in inRow, remove from cur's options
+    for (int j = 0; j < i; ++j) {
+      // printf("nOpts: %i, cur: [%i,%i]\n", cur->numOpts, r, c);
+      if (cur->numOpts) {
+        val = inRow[j];
+        if (cur->opts[val - 1]) {
+          // printf("has option %i\n", val);
+          cur->numOpts -= 1;
+          // printf("has %i opts\n", cur->numOpts);
+        }
+        cur->opts[val - 1] = false;
+      }
+    }
   }
+
+  // testing
+  /*
+  for (int i = 0; i < 9; ++i) {
+    struct Square cur = b->squares[r * 9 + i];
+    printf("col %i has the following options:", i);
+    for (int j = 0; j < 9; ++j) {
+      if (cur.opts[j]) {
+        printf(" %i", j + 1);
+      }
+    }
+    printf("\n and it has %i options\n", cur.numOpts);
+  }
+  */
   return;
 }
 
 void updateCol(struct Board* b, int c) {
+  uint8_t inCol[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int i = 0;
+  uint8_t val;
+
+  // generate list of numbers in col
+  for (int r = 0; r < 9; ++r) {
+    val = b->squares[r * 9 + c].val;
+    // printf("%i\n", val);
+    if (val) {
+      inCol[i] = val;
+      ++i;
+    }
+  }
+
+  // update options in row--for each character in row, remove from options
+  // of space on board
+  for (int r = 0; r < 9; ++r) {
+    struct Square* cur = &(b->squares[r * 9 + c]);
+    for (int j = 0; j < i; ++j) {
+      if (cur->numOpts) {
+        val = inCol[j];
+        if (cur->opts[val - 1]) {
+          //printf("has option %i\n", val);
+          cur->numOpts -= 1;
+          //printf("has %i opts\n", cur->numOpts);
+        }
+        cur->opts[val - 1] = false;
+      }
+    }
+  }
+
+  // testing
+  /*
+  for (int r = 0; r < 9; ++r) {
+    struct Square cur = b->squares[r * 9 + c];
+    printf("row %i has the following options:", r);
+    for (int j = 0; j < 9; ++j) {
+      if (cur.opts[j]) {
+        printf(" %i", j + 1);
+      }
+    }
+    printf("\n and it has %i options\n", cur.numOpts);
+  }
+  */
   return;
 }
 
@@ -72,5 +134,14 @@ void updateBox(struct Board* b, int topLeft) {
 }
 
 void updateBoard(struct Board* b) {
+  // update by rows
+  // updateRow(b, 8);
+  for (int i = 0; i < 9; ++i) {
+    updateRow(b, i);
+  }
+  //updateCol(b, 0);
+  for (int i = 0; i < 9; ++i) {
+    updateCol(b, i);
+  }
   return;
 }

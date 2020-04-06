@@ -96,7 +96,7 @@ void updateCol(struct Board* b, int c) {
     }
   }
 
-  // update options in row--for each character in row, remove from options
+  // update options in row--for each character in col, remove from options
   // of space on board
   for (int r = 0; r < 9; ++r) {
     struct Square* cur = &(b->squares[r * 9 + c]);
@@ -130,18 +130,98 @@ void updateCol(struct Board* b, int c) {
 }
 
 void updateBox(struct Board* b, int topLeft) {
+  // takes in top left corner's index
+  uint8_t inBox[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int i = 0;
+  uint8_t val;
+  
+  // helper variables; describe top left corner in r/c notation
+  int cornerR = topLeft / 9;
+  int cornerC = topLeft % 9;
+
+  // generate list of numbers in box
+  for (int r = cornerR; r < cornerR + 3; ++r) {
+    for (int c = cornerC; c < cornerC + 3; ++c) {
+      val = b->squares[r * 9 + c].val;
+      // printf("%i\n", val);
+      if (val) {
+        inBox[i] = val;
+        ++i;
+      }
+    }
+  }
+
+  // update options in box--for each character in box, remove from options
+  // of space on board
+  for (int r = cornerR; r < cornerR + 3; ++r) {
+    for (int c = cornerC; c < cornerC + 3; ++c) {
+      struct Square* cur = &(b->squares[r * 9 + c]);
+      for (int j = 0; j < i; ++j) {
+        if (cur->numOpts) {
+          val = inBox[j];
+          if (cur->opts[val - 1]) {
+            //printf("has option %i\n", val);
+            cur->numOpts -= 1;
+            //printf("has %i opts\n", cur->numOpts);
+          }
+          cur->opts[val - 1] = false;
+        }
+      }
+    }
+  }
+
+  // testing
+  /*
+  for (int r = cornerR; r < cornerR + 3; ++r) {
+    for (int c = cornerC; c < cornerC + 3; ++c) {
+      struct Square cur = b->squares[r * 9 + c];
+      printf("box [%i, %i] has the following options:", r, c);
+      for (int j = 0; j < 9; ++j) {
+        if (cur.opts[j]) {
+          printf(" %i", j + 1);
+        }
+      }
+      printf("\n and it has %i options\n", cur.numOpts);
+    }
+  }
+  */
   return;
 }
 
 void updateBoard(struct Board* b) {
   // update by rows
-  // updateRow(b, 8);
   for (int i = 0; i < 9; ++i) {
     updateRow(b, i);
   }
-  //updateCol(b, 0);
+  
+  // update by columns
   for (int i = 0; i < 9; ++i) {
     updateCol(b, i);
+  }
+
+  // update by boxes
+  for (int i = 0; i < 3; ++i) {
+    for (int j = 0; j < 3; ++j) {
+      updateBox(b, i * 27 + j * 3); // math to generate topLeft
+      //printf ("%i\n", i * 27 + j * 3);
+    }
+  }
+
+  // change values (simplistic, no recursion yet)
+  // TODO: recursion if needed
+  for (int r = 0; r < 9; ++r) {
+    for (int c = 0; c < 9; ++c) {
+      struct Square* cur = &(b->squares[r * 9 + c]);
+      if (cur->numOpts == 1) {
+        cur->numOpts = 0;
+        for (int i = 0; i < 9; ++i) {
+          if (cur->opts[i]) {
+            cur->val = i + 1;
+            break;
+          }
+        }
+      }
+    }
   }
   return;
 }

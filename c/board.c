@@ -1,4 +1,6 @@
-#include "board.h"
+// #include "board.h"
+#include "helper.h"
+#include<unistd.h>
 
 // this file contains the definitions of the functions declared in board.h
 
@@ -56,7 +58,7 @@ void updateRow(struct Board* b, int r) {
       if (cur->numOpts) {
         val = inRow[j];
         if (cur->opts[val - 1]) {
-          // printf("has option %i\n", val);
+          // printf("removing option %i\n", val);
           cur->numOpts -= 1;
           // printf("has %i opts\n", cur->numOpts);
         }
@@ -68,6 +70,7 @@ void updateRow(struct Board* b, int r) {
   // testing
   /*
   for (int i = 0; i < 9; ++i) {
+  //for (int i = 7; i < 8; ++i) {
     struct Square cur = b->squares[r * 9 + i];
     printf("col %i has the following options:", i);
     for (int j = 0; j < 9; ++j) {
@@ -78,6 +81,7 @@ void updateRow(struct Board* b, int r) {
     printf("\n and it has %i options\n", cur.numOpts);
   }
   */
+  
   return;
 }
 
@@ -194,6 +198,11 @@ void updateBoard(struct Board* b) {
     updateRow(b, i);
   }
   
+  /* for (int i = 0; i < 9; ++i) { */
+  /*   if (b->squares[16].opts[i]) { printf("%i ", i + 1); } */
+  /* } */
+  /* printf("\n"); */
+  
   // update by columns
   for (int i = 0; i < 9; ++i) {
     updateCol(b, i);
@@ -206,22 +215,45 @@ void updateBoard(struct Board* b) {
       //printf ("%i\n", i * 27 + j * 3);
     }
   }
+  
+  return;
+}
 
+
+
+void solve(struct Board* b) {
   // change values (simplistic, no recursion yet)
   // TODO: recursion if needed
-  for (int r = 0; r < 9; ++r) {
-    for (int c = 0; c < 9; ++c) {
-      struct Square* cur = &(b->squares[r * 9 + c]);
+  bool solved = false;
+  bool updated;
+  while (!solved) {
+    printBoard(b); //TESTING
+    updateBoard(b);
+    sleep(1); //TESTING
+
+    // keep track of board state for looping and recursing
+    solved = true;
+    updated = false;
+
+    // loop through each square; update its value if possible
+    for (int i = 0; i < 81; ++i) {
+      struct Square* cur = &(b->squares[i]);
+      // printf("square %i has %i opts\n", i, cur->numOpts);
       if (cur->numOpts == 1) {
+        updated = true;
         cur->numOpts = 0;
-        for (int i = 0; i < 9; ++i) {
-          if (cur->opts[i]) {
-            cur->val = i + 1;
+        for (int j = 0; j < 9; ++j) {
+          if (cur->opts[j]) {
+            // printf("SETTING %i TO %i\n", i, j + 1);
+            cur->val = j + 1;
             break;
           }
         }
       }
+      // if the square has options, board is not solved
+      else if (cur->numOpts) {
+        solved = false;
+      }
     }
   }
-  return;
 }

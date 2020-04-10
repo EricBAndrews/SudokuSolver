@@ -36,3 +36,6 @@ void updateBox(struct Board* b, int topLeft);
 
 // calls updateRow, updateCol, and updateBox on each row, column, and box
 void updateBoard(struct Board* b);
+
+// repeatedly tries to solve the board by elimination; if that fails, starts recursing
+void solve(struct Board* b);

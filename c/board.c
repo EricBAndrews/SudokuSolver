@@ -8,7 +8,6 @@ struct Square initSquare(int val) {
   struct Square ret;
   ret.val = (uint8_t) val;
   ret.numOpts = (val == 0) ? 9 : 0; // 0 options represents fixed number
-  // int curOpt = 1;
   for (int i = 0; i < 9; ++i) {
     ret.opts[i] = (i + 1 == val) ? false : true;
   }
@@ -27,6 +26,17 @@ struct Board* initBoard() {
   return newBoard;
 }
 
+struct Square copySquare(struct Square toCopy) {
+  struct Square ret;
+  ret.val = toCopy.val;
+  ret.numOpts = toCopy.numOpts;
+  
+}
+
+struct Board* copyBoard(board* toCopy) {
+  return NULL;
+}
+
 void clearBoard(struct Board* toClear) {
   free(toClear->squares);
   free(toClear);
@@ -41,7 +51,6 @@ void updateRow(struct Board* b, int r) {
   // generate list of numbers in row
   for (int c = 0; c < 9; ++c) {
     val = b->squares[r * 9 + c].val;
-    // printf("%i\n", val);
     if (val) {
       inRow[i] = val;
       ++i;
@@ -54,34 +63,16 @@ void updateRow(struct Board* b, int r) {
     struct Square* cur = &(b->squares[r * 9 + c]);
     // for each value in inRow, remove from cur's options
     for (int j = 0; j < i; ++j) {
-      // printf("nOpts: %i, cur: [%i,%i]\n", cur->numOpts, r, c);
       if (cur->numOpts) {
         val = inRow[j];
         if (cur->opts[val - 1]) {
-          // printf("removing option %i\n", val);
           cur->numOpts -= 1;
-          // printf("has %i opts\n", cur->numOpts);
         }
         cur->opts[val - 1] = false;
       }
     }
   }
 
-  // testing
-  /*
-  for (int i = 0; i < 9; ++i) {
-  //for (int i = 7; i < 8; ++i) {
-    struct Square cur = b->squares[r * 9 + i];
-    printf("col %i has the following options:", i);
-    for (int j = 0; j < 9; ++j) {
-      if (cur.opts[j]) {
-        printf(" %i", j + 1);
-      }
-    }
-    printf("\n and it has %i options\n", cur.numOpts);
-  }
-  */
-  
   return;
 }
 
@@ -93,7 +84,6 @@ void updateCol(struct Board* b, int c) {
   // generate list of numbers in col
   for (int r = 0; r < 9; ++r) {
     val = b->squares[r * 9 + c].val;
-    // printf("%i\n", val);
     if (val) {
       inCol[i] = val;
       ++i;
@@ -108,28 +98,12 @@ void updateCol(struct Board* b, int c) {
       if (cur->numOpts) {
         val = inCol[j];
         if (cur->opts[val - 1]) {
-          //printf("has option %i\n", val);
           cur->numOpts -= 1;
-          //printf("has %i opts\n", cur->numOpts);
         }
         cur->opts[val - 1] = false;
       }
     }
   }
-
-  // testing
-  /*
-  for (int r = 0; r < 9; ++r) {
-    struct Square cur = b->squares[r * 9 + c];
-    printf("row %i has the following options:", r);
-    for (int j = 0; j < 9; ++j) {
-      if (cur.opts[j]) {
-        printf(" %i", j + 1);
-      }
-    }
-    printf("\n and it has %i options\n", cur.numOpts);
-  }
-  */
   return;
 }
 
@@ -147,7 +121,6 @@ void updateBox(struct Board* b, int topLeft) {
   for (int r = cornerR; r < cornerR + 3; ++r) {
     for (int c = cornerC; c < cornerC + 3; ++c) {
       val = b->squares[r * 9 + c].val;
-      // printf("%i\n", val);
       if (val) {
         inBox[i] = val;
         ++i;
@@ -164,31 +137,13 @@ void updateBox(struct Board* b, int topLeft) {
         if (cur->numOpts) {
           val = inBox[j];
           if (cur->opts[val - 1]) {
-            //printf("has option %i\n", val);
             cur->numOpts -= 1;
-            //printf("has %i opts\n", cur->numOpts);
           }
           cur->opts[val - 1] = false;
         }
       }
     }
   }
-
-  // testing
-  /*
-  for (int r = cornerR; r < cornerR + 3; ++r) {
-    for (int c = cornerC; c < cornerC + 3; ++c) {
-      struct Square cur = b->squares[r * 9 + c];
-      printf("box [%i, %i] has the following options:", r, c);
-      for (int j = 0; j < 9; ++j) {
-        if (cur.opts[j]) {
-          printf(" %i", j + 1);
-        }
-      }
-      printf("\n and it has %i options\n", cur.numOpts);
-    }
-  }
-  */
   return;
 }
 
@@ -197,11 +152,6 @@ void updateBoard(struct Board* b) {
   for (int i = 0; i < 9; ++i) {
     updateRow(b, i);
   }
-  
-  /* for (int i = 0; i < 9; ++i) { */
-  /*   if (b->squares[16].opts[i]) { printf("%i ", i + 1); } */
-  /* } */
-  /* printf("\n"); */
   
   // update by columns
   for (int i = 0; i < 9; ++i) {
@@ -212,14 +162,25 @@ void updateBoard(struct Board* b) {
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
       updateBox(b, i * 27 + j * 3); // math to generate topLeft
-      //printf ("%i\n", i * 27 + j * 3);
     }
   }
-  
   return;
 }
 
-
+int findMin(struct Board* b) {
+  int min = -1;
+  int minOpts = 10;
+  for (int i = 0; i < 81; ++i) {
+    if (b->squares[i].numOpts && b->squares[i].numOpts < minOpts) {
+      min = i;
+      minOpts = b->squares[i].numOpts[i];
+    }
+  }
+  if (min == -1) {
+    printf("something has gone terribly wrong, no min square!\n");
+  }
+  return min;
+}
 
 void solve(struct Board* b) {
   // change values (simplistic, no recursion yet)
@@ -238,13 +199,11 @@ void solve(struct Board* b) {
     // loop through each square; update its value if possible
     for (int i = 0; i < 81; ++i) {
       struct Square* cur = &(b->squares[i]);
-      // printf("square %i has %i opts\n", i, cur->numOpts);
       if (cur->numOpts == 1) {
         updated = true;
         cur->numOpts = 0;
         for (int j = 0; j < 9; ++j) {
           if (cur->opts[j]) {
-            // printf("SETTING %i TO %i\n", i, j + 1);
             cur->val = j + 1;
             break;
           }
@@ -254,6 +213,11 @@ void solve(struct Board* b) {
       else if (cur->numOpts) {
         solved = false;
       }
+    }
+
+    // if board not solved and not updated, time to recurse
+    if (!solved && !updated) {
+      int minSquare = findMin(b);
     }
   }
 }

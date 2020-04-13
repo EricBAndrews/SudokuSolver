@@ -22,6 +22,12 @@ struct Square initSquare(int val);
 // returns a board of all 0s and all options 1-9
 struct Board* initBoard();
 
+// deep copies toCopy and returns the new square
+struct Square copySquare(struct Square toCopy);
+
+// deep copies toCopy and returns a pointer to it
+struct Board* copyBoard(struct Board* toCopy);
+
 // deallocates memory for the given board
 void clearBoard(struct Board* toClear);
 
@@ -36,6 +42,9 @@ void updateBox(struct Board* b, int topLeft);
 
 // calls updateRow, updateCol, and updateBox on each row, column, and box
 void updateBoard(struct Board* b);
+
+// returns the unsolved square with the minimum number of options in b
+int findMin(struct Board* b);
 
 // repeatedly tries to solve the board by elimination; if that fails, starts recursing
 void solve(struct Board* b);

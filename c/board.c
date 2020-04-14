@@ -18,10 +18,8 @@ struct Board* initBoard() {
   struct Square* squares = malloc(sizeof(struct Square) * 81);
   struct Board* newBoard = malloc(sizeof(struct Board));
   newBoard->squares = squares;
-  for (int i = 0; i < 9; ++i) {
-    for (int j = 0; j < 9; ++j) {
-      newBoard->squares[(9 * i) + j] = initSquare(0);
-    }
+  for (int i = 0; i < 81; ++i) {
+    newBoard->squares[i] = initSquare(0);
   }
   return newBoard;
 }
@@ -30,11 +28,19 @@ struct Square copySquare(struct Square toCopy) {
   struct Square ret;
   ret.val = toCopy.val;
   ret.numOpts = toCopy.numOpts;
-  
+  for (int i = 0; i < 9; ++i) {
+    ret.opts[i] = toCopy.opts[i];
+  }
+  return ret;
 }
 
-struct Board* copyBoard(board* toCopy) {
-  return NULL;
+struct Board* copyBoard(struct Board* toCopy) {
+  struct Board* ret = malloc(sizeof(struct Board));
+  ret->squares = malloc(sizeof(struct Square) * 81);
+  for (int i = 0; i < 81; ++i) {
+    ret->squares[i] = copySquare(toCopy->squares[i]);
+  }
+  return ret;
 }
 
 void clearBoard(struct Board* toClear) {
@@ -173,7 +179,7 @@ int findMin(struct Board* b) {
   for (int i = 0; i < 81; ++i) {
     if (b->squares[i].numOpts && b->squares[i].numOpts < minOpts) {
       min = i;
-      minOpts = b->squares[i].numOpts[i];
+      minOpts = b->squares[i].numOpts;
     }
   }
   if (min == -1) {
@@ -218,6 +224,7 @@ void solve(struct Board* b) {
     // if board not solved and not updated, time to recurse
     if (!solved && !updated) {
       int minSquare = findMin(b);
+      printf("min square: %i\n", minSquare);
     }
   }
 }
